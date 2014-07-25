@@ -62,7 +62,7 @@ describe EncapsulateAsMoney do
     When(:model_class) {
       Class.new(model_base_class_with_attr) {
         encapsulate_as_money :attribute
-        attr :currency, true
+        attr :currency
       }
     }
     Given!(:initial_currency_set) { model_instance.instance_variable_set :@currency, initial_currency_value }
@@ -78,10 +78,24 @@ describe EncapsulateAsMoney do
       Then { model_instance.attribute == Money.new(1) }
     end
 
-    context "Setting currency" do
-      When(:money_is_set_with_currency) { model_instance.attribute = Money.new(1_000_000, 'BTC') }
-      Then { model_instance.attribute == Money.new(1_000_000, 'BTC') }
-      Then { model_instance.currency == 'BTC' }
+    context "Setting with a different currency causes an error" do
+      When(:initial_currency_value) { 'AUD' }
+      Then do
+        assert_raises(RuntimeError) { model_instance.attribute = Money.new(1_000_000, 'BTC') }
+      end
+    end
+
+    context "Setting with currency other than default currency when the parent currency is nil raises an error" do
+      When(:initial_currency_value) { nil }
+      Then do
+        assert_raises(RuntimeError) { model_instance.attribute = Money.new(1_000_000, 'BTC') }
+      end
+    end
+
+    context "Setting with the same currency as the parent object works" do
+      When(:initial_currency_value) { 'BTC' }
+      When(:an_amount_with_currency_is_set) { model_instance.attribute = Money.new(1_000_000, 'BTC') }
+      Then{ model_instance.attribute == Money.new(1_000_000, 'BTC')  }
     end
   end
 end

@@ -62,7 +62,7 @@ Once persisted we can find the value like:
 MyModel.find_by_id(1).amount #=> 5.dollars
 ```
 
-Note that it uses the default Money currency.
+If there is a currency column, it will set that. 
 
 ## Contributing
 
