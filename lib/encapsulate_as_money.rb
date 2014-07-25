@@ -32,10 +32,12 @@ private
     end
 
     define_method "#{attribute}=" do |money|
-      if respond_to?(:currency) && currency
-        raise RuntimeError.new("Currency Missmatch") if money.currency != currency
+      if respond_to?(:currency=) && money.currency
+        self.currency = money.currency
+        super(money && money.fractional)
+      else
+        super(money && money.fractional)
       end
-      super(money && money.fractional)
     end
   end
 
