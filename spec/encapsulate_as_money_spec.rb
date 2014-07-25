@@ -57,4 +57,33 @@ describe EncapsulateAsMoney do
       Then { model_instance.attribute == Money.new(1) }
     end
   end
+
+  describe "currency" do
+    When(:model_class) {
+      Class.new(model_base_class_with_attr) {
+        encapsulate_as_money :attribute
+        attr :currency
+      }
+    }
+    Given!(:initial_currency_set) { model_instance.instance_variable_set :@currency, initial_currency_value }
+    Given(:initial_attr_value) { 1 }
+    Given(:initial_currency_value) { 'AUD' }
+
+    context "Currency Initial value is 1 AUD" do
+      Then { model_instance.attribute == Money.new(1, 'AUD') }
+    end
+
+    context "When currency is null it should default to no currency" do
+      Given(:initial_currency_value) { nil }
+      Then { model_instance.attribute == Money.new(1) }
+    end
+
+    context "Setting incorrect currency" do
+      Then do
+        assert_raises(RuntimeError) do
+          model_instance.attribute = Money.new(1, 'USD')
+        end
+      end
+    end
+  end
 end
